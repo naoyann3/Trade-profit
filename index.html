@@ -32,7 +32,7 @@
 
 <div class="w-full md:max-w-3xl mx-auto bg-white md:shadow-xl md:rounded-xl overflow-hidden border-b md:border border-slate-200 md:mt-8">
     
-    <!-- ヘッダー -->
+    <!-- ヘッダー (名称変更) -->
     <div class="bg-indigo-900 text-white p-5 md:rounded-t-xl">
         <h2 class="text-lg md:text-xl font-bold flex items-center gap-2">
             🚀 KTC短期トレード資金管理プランナー
@@ -51,6 +51,8 @@
             <div>
                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1">1回の利幅目標 (%)</label>
                 <input type="number" id="profitRate" value="3.0" step="0.1" class="mono w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-right font-bold text-lg bg-slate-50 focus:bg-white transition">
+                <!-- 利幅目標の注釈追加 -->
+                <p class="text-xs text-slate-400 text-right mt-1">▲▼ この数値は変更できます</p>
             </div>
         </div>
 
@@ -91,16 +93,16 @@
 
         <!-- ピラミッティング入力エリア -->
         <div>
-            <div class="flex flex-col sm:flex-row justify-between sm:items-end mb-3 gap-2">
+            <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-3 gap-2">
                 <h3 class="font-bold text-sm text-slate-700 flex items-center gap-2">
                     <span>📝 玉ごとの利確回数</span>
                 </h3>
                 <!-- 注釈を強調 -->
-                <p class="text-xs bg-gray-100 text-slate-500 flex items-center gap-1 p-2 rounded-md border border-slate-200">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-slate-400">
+                <p class="text-xs bg-blue-50 text-blue-800 flex items-center gap-2 p-2 rounded-lg border border-blue-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-5 h-5 text-blue-500 shrink-0">
                       <path fill-rule="evenodd" d="M15 8A7 7 0 1 1 1 8a7 7 0 0 1 14 0Zm-6 3.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM8.25 4.5a.75.75 0 0 0-1.5 0v3.5a.75.75 0 0 0 1.5 0V4.5Z" clip-rule="evenodd" />
                     </svg>
-                    <span>プリセット選択後も、各回数は**直接編集可能**です</span>
+                    <span>プリセット選択後も、各回数は<strong class="font-bold text-blue-900">直接編集可能</strong>です。</span>
                 </p>
             </div>
             <div class="overflow-x-auto rounded-lg border border-slate-200">
@@ -295,10 +297,10 @@
         setupCurrencyInput('capital');
         renderTable();
         document.getElementById('total-allocation').textContent = allocations.reduce((a, b) => a + b, 0);
-        applyPreset('avg'); 
+        applyPreset('avg', false); 
         
-        // 初回計算
-        calculate();
+        // 初回計算は実行しない（ボタンを押すまで「---」表示）
+        // calculate(); 
     }
     
     function setupCurrencyInput(id) {
@@ -336,8 +338,8 @@
                 <tr class="border-b last:border-0 ${rowClass}">
                     <td class="p-2 font-mono ${fontStyle} text-center">${numDisplay}${badge}</td>
                     <td class="p-2 font-mono text-slate-500 text-center text-xs">${rate}%</td>
-                    <td class="p-2 font-mono font-bold text-right text-xs md:text-sm" id="amount-${index}">0</td>
-                    <td class="p-2 font-mono text-blue-600 text-right text-xs md:text-sm" id="win-profit-${index}">0</td>
+                    <td class="p-2 font-mono font-bold text-right text-xs md:text-sm" id="amount-${index}">-</td>
+                    <td class="p-2 font-mono text-blue-600 text-right text-xs md:text-sm" id="win-profit-${index}">-</td>
                     <td class="p-2 text-center">
                         <input type="number" min="0" id="win-input-${index}" 
                             class="mono w-12 p-1 border border-slate-300 rounded text-center focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none bg-white bg-opacity-70 transition-colors"
@@ -446,4 +448,3 @@
 
 </body>
 </html>
-
