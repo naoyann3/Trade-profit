@@ -71,15 +71,6 @@
             <p class="text-xs text-right text-slate-400 mt-2">配分率合計: <span id="total-allocation">0</span>%</p>
         </div>
 
-        <!-- 労働時間設定 -->
-        <div class="flex items-center justify-end gap-4 bg-slate-50 p-3 rounded">
-            <label class="text-xs font-bold text-slate-500">想定労働時間 (月/h)</label>
-            <div class="flex items-center gap-2">
-                <input type="number" id="hours" value="60" class="mono w-20 p-1 border border-slate-300 rounded text-right">
-                <span class="text-xs text-slate-400">時間</span>
-            </div>
-        </div>
-
         <!-- 結果表示エリア -->
         <div class="bg-slate-100 rounded-lg p-5 border border-slate-200">
             <div class="grid grid-cols-2 gap-4 mb-4">
@@ -98,9 +89,9 @@
                     <p class="font-bold text-slate-700">最終損益 (Net Profit)</p>
                     <p class="mono text-3xl font-bold" id="net-profit">0</p>
                 </div>
-                <div class="flex justify-end items-center gap-2">
-                    <span class="text-xs text-slate-400">労働時給換算:</span>
-                    <span class="mono font-bold text-slate-600" id="hourly-wage">0</span>
+                <!-- 時給計算を削除し、シンプルな収支のみを表示 -->
+                <div class="text-right mt-2">
+                    <p class="text-xs text-slate-500" id="status-message">---</p>
                 </div>
             </div>
         </div>
@@ -112,7 +103,7 @@
     // タケさん式ピラミッティング配分
     const allocations = [2, 3, 5, 7, 8, 10, 12, 15, 18, 20];
     
-    // 初期値としての月間勝数（例：浅い玉は多く、深い玉は少なく）
+    // 初期値としての月間勝数
     const defaultWins = [3, 2, 1, 1, 0, 0, 0, 0, 0, 0];
 
     function init() {
@@ -136,18 +127,14 @@
         });
         tbody.innerHTML = html;
         
-        // 合計配分率表示
         document.getElementById('total-allocation').textContent = allocations.reduce((a, b) => a + b, 0);
-
         calculate();
     }
 
-    // 数値フォーマット（カンマ区切り）
     function fmt(num) {
         return num.toLocaleString() + ' 円';
     }
 
-    // 入力欄のカンマ処理
     function formatCurrencyInput(input) {
         let val = input.value.replace(/[^0-9]/g, '');
         if (val === '') val = '0';
@@ -164,44 +151,47 @@
         const capital = getNum('capital');
         const profitRate = getNum('profitRate') / 100;
         const cost = getNum('cost');
-        const hours = getNum('hours');
 
         let totalGross = 0;
         const winInputs = document.querySelectorAll('.win-input');
 
         allocations.forEach((rate, index) => {
-            // 各玉の投資額
             const investAmount = capital * (rate / 100);
             document.getElementById(`amount-${index}`).textContent = Math.floor(investAmount).toLocaleString();
 
-            // 1勝あたりの利益
             const oneWinProfit = investAmount * profitRate;
             document.getElementById(`win-profit-${index}`).textContent = '+' + Math.floor(oneWinProfit).toLocaleString();
 
-            // 月間勝数に基づく利益
             const wins = Number(winInputs[index].value);
             totalGross += oneWinProfit * wins;
         });
 
-        // 結果表示
         const netProfit = totalGross - cost;
-        const hourlyWage = hours > 0 ? netProfit / hours : 0;
 
         document.getElementById('gross-profit').textContent = '+' + fmt(Math.floor(totalGross));
         document.getElementById('display-cost').textContent = '▲' + fmt(cost);
         
         const netEl = document.getElementById('net-profit');
         netEl.textContent = (netProfit > 0 ? '+' : '') + fmt(Math.floor(netProfit));
-        netEl.className = `mono text-3xl font-bold ${netProfit > 0 ? 'text-emerald-600' : 'text-rose-600'}`;
+        
+        const statusEl = document.getElementById('status-message');
 
-        document.getElementById('hourly-wage').textContent = fmt(Math.floor(hourlyWage));
+        if (netProfit > 0) {
+            netEl.className = "mono text-3xl font-bold text-emerald-600";
+            statusEl.textContent = "資産は増加しています。";
+            statusEl.className = "text-xs text-emerald-600 font-bold";
+        } else if (netProfit === 0) {
+            netEl.className = "mono text-3xl font-bold text-slate-500";
+            statusEl.textContent = "収支トントンです。";
+            statusEl.className = "text-xs text-slate-500";
+        } else {
+            netEl.className = "mono text-3xl font-bold text-rose-600";
+            statusEl.textContent = "会費コストが利益を上回っています。";
+            statusEl.className = "text-xs text-rose-600 font-bold";
+        }
     }
 
-    // イベントリスナー
     document.getElementById('profitRate').addEventListener('input', calculate);
-    document.getElementById('hours').addEventListener('input', calculate);
-
-    // 初期化
     window.onload = init;
 </script>
 
