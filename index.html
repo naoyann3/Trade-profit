@@ -9,11 +9,11 @@
 <style>
     body { font-family: 'Noto Sans JP', sans-serif; background-color: #f8fafc; }
     .mono { font-family: 'Roboto Mono', monospace; }
-    input[type="number"]::-webkit-inner-spin-button, 
-    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    /* スマホでの入力しやすさを調整 */
+    input[type="number"] { padding-right: 5px; }
 </style>
 </head>
-<body class="p-4 md:p-8 text-slate-700">
+<body class="p-2 md:p-8 text-slate-700">
 
 <div class="max-w-3xl mx-auto bg-white shadow-lg rounded-xl overflow-hidden border border-slate-200">
     
@@ -22,10 +22,10 @@
         <h2 class="text-xl font-bold flex items-center gap-2">
             📊 短期トレード収支試算表
         </h2>
-        <p class="text-xs text-slate-400 mt-1">10分割ピラミッティング方式対応</p>
+        <p class="text-xs text-slate-400 mt-1">10分割ピラミッティング方式・2025年基準</p>
     </div>
 
-    <div class="p-6 space-y-8">
+    <div class="p-4 md:p-6 space-y-8">
         
         <!-- 基本設定エリア -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -48,19 +48,19 @@
         <!-- ピラミッティング入力エリア -->
         <div>
             <h3 class="font-bold text-sm text-slate-700 mb-3 flex justify-between items-end">
-                <span>月間トレード実績入力</span>
-                <span class="text-xs text-slate-400 font-normal">※下に行くほど深い位置での約定</span>
+                <span>月間 利確回数 (実績/想定)</span>
+                <span class="text-xs text-slate-400 font-normal">※2025年の低ボラティリティを考慮</span>
             </h3>
             
             <div class="overflow-x-auto">
                 <table class="w-full text-sm text-left">
                     <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b">
                         <tr>
-                            <th class="p-2 w-16">玉No.</th>
-                            <th class="p-2 w-20">配分率</th>
-                            <th class="p-2">投資金額</th>
-                            <th class="p-2">1勝の利益</th>
-                            <th class="p-2 w-24">月間勝数</th>
+                            <th class="p-2 w-12">玉No.</th>
+                            <th class="p-2 w-16">配分</th>
+                            <th class="p-2 text-right">投資金額</th>
+                            <th class="p-2 text-right">1回の利益</th>
+                            <th class="p-2 w-20 text-center">月間回数</th>
                         </tr>
                     </thead>
                     <tbody id="table-body">
@@ -68,28 +68,27 @@
                     </tbody>
                 </table>
             </div>
-            <p class="text-xs text-right text-slate-400 mt-2">配分率合計: <span id="total-allocation">0</span>%</p>
+            <p class="text-xs text-right text-slate-400 mt-2">資金配分率合計: <span id="total-allocation">0</span>%</p>
         </div>
 
         <!-- 結果表示エリア -->
         <div class="bg-slate-100 rounded-lg p-5 border border-slate-200">
             <div class="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                    <p class="text-xs text-slate-500">月間 粗利益</p>
+                    <p class="text-xs text-slate-500">月間 粗利益 (Gross)</p>
                     <p class="mono text-xl font-bold text-blue-600" id="gross-profit">0</p>
                 </div>
                 <div>
-                    <p class="text-xs text-slate-500">経費 (会費)</p>
+                    <p class="text-xs text-slate-500">月間 経費 (Cost)</p>
                     <p class="mono text-xl font-bold text-red-500" id="display-cost">0</p>
                 </div>
             </div>
             
             <div class="border-t border-slate-300 pt-4">
                 <div class="flex justify-between items-end mb-1">
-                    <p class="font-bold text-slate-700">最終損益 (Net Profit)</p>
+                    <p class="font-bold text-slate-700">最終月間収支 (Net Profit)</p>
                     <p class="mono text-3xl font-bold" id="net-profit">0</p>
                 </div>
-                <!-- 時給計算を削除し、シンプルな収支のみを表示 -->
                 <div class="text-right mt-2">
                     <p class="text-xs text-slate-500" id="status-message">---</p>
                 </div>
@@ -103,8 +102,9 @@
     // タケさん式ピラミッティング配分
     const allocations = [2, 3, 5, 7, 8, 10, 12, 15, 18, 20];
     
-    // 初期値としての月間勝数
-    const defaultWins = [3, 2, 1, 1, 0, 0, 0, 0, 0, 0];
+    // 2025年基準のリアルなデフォルト値 (合計10回)
+    // 浅い玉は回るが、深い玉は滅多に刺さらない現実を反映
+    const defaultWins = [4, 3, 2, 1, 0, 0, 0, 0, 0, 0];
 
     function init() {
         const tbody = document.getElementById('table-body');
@@ -113,10 +113,10 @@
         allocations.forEach((rate, index) => {
             html += `
                 <tr class="border-b hover:bg-slate-50 transition">
-                    <td class="p-2 font-mono text-slate-400">#${index + 1}</td>
-                    <td class="p-2 font-mono text-slate-500">${rate}%</td>
-                    <td class="p-2 font-mono font-bold" id="amount-${index}">0</td>
-                    <td class="p-2 font-mono text-blue-600" id="win-profit-${index}">0</td>
+                    <td class="p-2 font-mono text-slate-400 text-center">#${index + 1}</td>
+                    <td class="p-2 font-mono text-slate-500 text-center">${rate}%</td>
+                    <td class="p-2 font-mono font-bold text-right" id="amount-${index}">0</td>
+                    <td class="p-2 font-mono text-blue-600 text-right" id="win-profit-${index}">0</td>
                     <td class="p-2">
                         <input type="number" min="0" value="${defaultWins[index]}" 
                             class="mono w-full p-1 border border-slate-300 rounded text-center focus:bg-blue-50 outline-none win-input"
@@ -178,15 +178,15 @@
 
         if (netProfit > 0) {
             netEl.className = "mono text-3xl font-bold text-emerald-600";
-            statusEl.textContent = "資産は増加しています。";
+            statusEl.textContent = "✅ コストを上回る利益が出ています";
             statusEl.className = "text-xs text-emerald-600 font-bold";
         } else if (netProfit === 0) {
             netEl.className = "mono text-3xl font-bold text-slate-500";
-            statusEl.textContent = "収支トントンです。";
+            statusEl.textContent = "収支トントンです";
             statusEl.className = "text-xs text-slate-500";
         } else {
             netEl.className = "mono text-3xl font-bold text-rose-600";
-            statusEl.textContent = "会費コストが利益を上回っています。";
+            statusEl.textContent = "⚠️ 利益よりも会費コストが上回っています";
             statusEl.className = "text-xs text-rose-600 font-bold";
         }
     }
