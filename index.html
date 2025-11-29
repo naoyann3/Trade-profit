@@ -409,4 +409,23 @@
             modal.classList.remove('opacity-0', 'pointer-events-none');
             body.classList.add('modal-active');
             setTimeout(() => {
-                c
+                container.classList.remove('scale-95');
+                container.classList.add('scale-100');
+            }, 10);
+        } else {
+            // Close
+            container.classList.remove('scale-100');
+            container.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                body.classList.remove('modal-active');
+            }, 200);
+        }
+    }
+
+    document.getElementById('profitRate').addEventListener('input', calculate);
+    window.onload = init;
+</script>
+
+</body>
+</html>
