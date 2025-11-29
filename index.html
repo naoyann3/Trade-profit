@@ -35,7 +35,7 @@
     <!-- ヘッダー -->
     <div class="bg-indigo-900 text-white p-5 md:rounded-t-xl">
         <h2 class="text-lg md:text-xl font-bold flex items-center gap-2">
-            🚀 短期トレード 収支シミュレーター
+            🚀 KTC短期トレード 収支シミュレーター
         </h2>
         <p class="text-xs text-indigo-200 mt-1">10分割ピラミッティング方式・期待収益試算</p>
     </div>
@@ -46,7 +46,8 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
             <div>
                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1">運用資金 (円)</label>
-                <input type="text" id="capital" value="1,000,000" oninput="formatCurrencyInput(this)" class="mono w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-right font-bold text-lg bg-slate-50 focus:bg-white transition">
+                <!-- type="tel"でスマホのテンキーを呼び出す -->
+                <input type="tel" id="capital" value="1,000,000" class="mono w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-right font-bold text-lg bg-slate-50 focus:bg-white transition">
             </div>
             <div>
                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1">1回の利幅目標 (%)</label>
@@ -64,7 +65,7 @@
                     <span class="text-[10px] font-normal bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full">自動入力</span>
                 </h3>
                 
-                <!-- 根拠データボタン（強調版） -->
+                <!-- 根拠データボタン -->
                 <button onclick="toggleModal()" class="w-full md:w-auto text-xs font-bold bg-indigo-600 text-white px-5 py-2.5 rounded-full hover:bg-indigo-700 transition shadow-md flex items-center justify-center gap-2 transform active:scale-95 ring-2 ring-indigo-100">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-indigo-200">
                         <path d="M15.5 2A1.5 1.5 0 0 0 14 3.5v8a1.5 1.5 0 0 0 1.5 1.5h3.5a1.5 1.5 0 0 0 1.5-1.5v-8A1.5 1.5 0 0 0 19 2h-3.5ZM13 4.5V14a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2ZM10 9v3.5a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 12.5v-3.5A1.5 1.5 0 0 1 5 7.5h3.5A1.5 1.5 0 0 1 10 9Z" />
@@ -117,7 +118,7 @@
             <p class="text-[10px] text-right text-slate-400 mt-2">※合計配分: <span id="total-allocation">0</span>%</p>
         </div>
 
-        <!-- 計算ボタン (ここを押すと計算実行) -->
+        <!-- 計算ボタン -->
         <button onclick="calculate()" class="w-full py-4 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition transform active:scale-95 text-lg flex items-center justify-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
@@ -291,11 +292,39 @@
     let currentPresetType = 'avg';
 
     function init() {
+        // 通貨入力欄のセットアップ
+        setupCurrencyInput('capital');
+        
         renderTable();
         document.getElementById('total-allocation').textContent = allocations.reduce((a, b) => a + b, 0);
         
-        // 初期プリセットは「全期間平均」をセット
+        // 初期プリセット適用
         applyPreset('avg', true); 
+    }
+    
+    // 通貨入力の挙動制御（Focusで数値のみ、Blurでカンマ付与）
+    function setupCurrencyInput(id) {
+        const el = document.getElementById(id);
+        
+        el.addEventListener('focus', function() {
+            // フォーカス時：カンマを除去して数値のみにする
+            let val = this.value.replace(/[^0-9]/g, '');
+            if (Number(val) === 0) val = ''; // 0なら空にして打ちやすく
+            this.value = val;
+            this.select(); // 全選択
+        });
+
+        el.addEventListener('blur', function() {
+            // フォーカスアウト時：カンマ区切りに戻す
+            let val = this.value.replace(/[^0-9]/g, '');
+            if (val === '') val = '0';
+            this.value = Number(val).toLocaleString();
+        });
+        
+        el.addEventListener('input', function() {
+            // 入力中：数字以外を削除
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
     }
 
     function renderTable() {
@@ -325,7 +354,7 @@
         tbody.innerHTML = html;
     }
 
-    function applyPreset(type, autoCalc = false) {
+    function applyPreset(type, doFlash = true) {
         const preset = presets[type];
         if (!preset) return;
 
@@ -345,7 +374,7 @@
             const input = document.getElementById(`win-input-${idx}`);
             if (input) {
                 input.value = val;
-                flashInput(input);
+                if(doFlash) flashInput(input);
             }
         });
 
@@ -353,15 +382,14 @@
              const input = document.getElementById(`win-input-${i}`);
              if (input) {
                  input.value = 0;
+                 if(doFlash && input.value != 0) flashInput(input);
              }
         }
 
         currentPresetType = type;
         
-        // プリセットボタンを押したときだけは自動計算する
-        if(autoCalc) {
-            calculate();
-        }
+        // プリセット変更時は自動計算してあげる（UX向上）
+        calculate();
     }
 
     function flashInput(element) {
@@ -374,11 +402,13 @@
         return num.toLocaleString();
     }
 
+    // 手動計算時のフォーマット処理（oninput属性用にはもう使わないが、念のため残すなら中身を変える）
     function formatCurrencyInput(input) {
+        // 今回の改修でEventListener方式に変えたため、HTML側のoninputからは削除してOKですが
+        // 万が一HTMLに残っていた場合のための互換性
         let val = input.value.replace(/[^0-9]/g, '');
         if (val === '') val = '0';
-        input.value = Number(val).toLocaleString();
-        // 入力時はフォーマットのみで計算はしない（ボタン押下を促す）
+        // input.value = Number(val).toLocaleString(); // リアルタイムフォーマットは廃止
     }
 
     function getNum(id) {
@@ -428,7 +458,8 @@
             }, 200);
         }
     }
-    
+
+    document.getElementById('profitRate').addEventListener('input', calculate);
     window.onload = init;
 </script>
 
