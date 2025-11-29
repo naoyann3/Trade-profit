@@ -23,18 +23,23 @@
         <div class="p-6 space-y-6">
             <!-- 入力エリア -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <!-- 投資元本（カンマ対応のため type="text" に変更） -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">投資元本 (円)</label>
-                    <input type="number" id="capital" value="500000" step="10000" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none transition font-mono text-lg text-right">
+                    <input type="text" inputmode="numeric" id="capital" value="500,000" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none transition font-mono text-lg text-right">
                 </div>
+                
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">月利目標 (%)</label>
                     <input type="number" id="roi" value="3.0" step="0.1" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none transition font-mono text-lg text-right">
                 </div>
+                
+                <!-- 会費（カンマ対応のため type="text" に変更） -->
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">月額会費 (円)</label>
-                    <input type="number" id="fee" value="20000" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none transition font-mono text-lg text-right">
+                    <input type="text" inputmode="numeric" id="fee" value="20,000" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none transition font-mono text-lg text-right">
                 </div>
+                
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">労働時間 (月/h)</label>
                     <input type="number" id="hours" value="75" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none transition font-mono text-lg text-right">
@@ -76,70 +81,32 @@
     </div>
 
     <script>
-        function update() {
-            // 値の取得
-            const capital = Number(document.getElementById('capital').value);
-            const roi = Number(document.getElementById('roi').value);
-            const fee = Number(document.getElementById('fee').value);
-            const hours = Number(document.getElementById('hours').value) || 1;
+        // カンマ区切りの文字列を数値に変換する関数
+        const parseNum = (str) => {
+            if (!str) return 0;
+            // 全角数字を半角にし、カンマを除去して数値化
+            const cleanStr = String(str).replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0)).replace(/,/g, '');
+            return Number(cleanStr);
+        };
 
-            // 計算
-            const gross = capital * (roi / 100);
-            const net = gross - fee;
-            const wage = net / hours;
-            const breakeven = (roi > 0) ? (fee / (roi / 100)) : 0;
+        // 数値をカンマ区切りの文字列にする関数
+        const fmtNum = (num) => {
+            return num.toLocaleString();
+        };
 
-            // 表示フォーマット関数
-            const fmt = (n) => n.toLocaleString() + ' 円';
-
-            // DOM更新
-            document.getElementById('gross-profit').textContent = '+' + fmt(Math.floor(gross));
-            document.getElementById('fee-display').textContent = '▲' + fmt(fee);
-            
-            const netEl = document.getElementById('net-profit');
-            netEl.textContent = (net > 0 ? '+' : '') + fmt(Math.floor(net));
-            netEl.className = `font-mono text-3xl font-bold ${net > 0 ? 'text-emerald-600' : 'text-rose-600'}`;
-            
-            document.getElementById('hourly-wage').textContent = fmt(Math.floor(wage)) + ' /h';
-
-            // 判定ロジック
-            const box = document.getElementById('result-box');
-            const title = document.getElementById('result-title');
-            const desc = document.getElementById('result-desc');
-            const beText = document.getElementById('breakeven-text');
-
-            box.classList.remove('hidden', 'bg-emerald-100', 'border-emerald-500', 'text-emerald-800', 'bg-rose-100', 'border-rose-500', 'text-rose-800', 'bg-amber-100', 'border-amber-500', 'text-amber-800');
-
-            if (net > 0) {
-                if (wage < 1050) {
-                    // 黒字だが時給が低い
-                    box.classList.add('bg-amber-100', 'border-amber-500', 'text-amber-800');
-                    title.textContent = "⚠️ コンビニバイト以下";
-                    desc.textContent = `黒字ですが、時給換算で ${Math.floor(wage)}円 です。リスクを負ってチャートを見るより、安全なバイトの方が稼げます。`;
-                    beText.textContent = "";
-                } else {
-                    // 完全勝利
-                    box.classList.add('bg-emerald-100', 'border-emerald-500', 'text-emerald-800');
-                    title.textContent = "🚀 労働の対価あり";
-                    desc.textContent = "おめでとうございます。立派なトレーダー（または富豪）です。";
-                    beText.textContent = "";
+        // 入力時にカンマを自動付与する処理
+        const formatInput = (e) => {
+            const val = parseNum(e.target.value);
+            if (!isNaN(val)) {
+                // カーソル位置の問題を防ぐため、値が変わった時だけ更新
+                const formatted = fmtNum(val);
+                if (e.target.value !== formatted && val !== 0) {
+                    e.target.value = formatted;
                 }
-            } else {
-                // 赤字（養分）
-                box.classList.add('bg-rose-100', 'border-rose-500', 'text-rose-800');
-                title.textContent = "💀 あなたは「養分」です";
-                desc.textContent = "会費負けしています。運営に寄付をしている状態です。";
-                beText.textContent = `損益分岐点（最低必要元本）: ${fmt(Math.floor(breakeven))}`;
             }
-        }
+            update(); // 計算も実行
+        };
 
-        // イベントリスナー
-        document.querySelectorAll('input').forEach(input => {
-            input.addEventListener('input', update);
-        });
-
-        // 初回実行
-        update();
-    </script>
-</body>
-</html>
+        function update() {
+            // 値の取得（カンマが入っていても parseNum で正しく数値化）
+            const capital = parseNum(document.ge
