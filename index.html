@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>KTC短期トレード 収支試算表</title>
+<title>KTC短期トレード 収支シミュレーター</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-    body { font-family: 'Noto Sans JP', sans-serif; background-color: #f1f5f9; -webkit-font-smoothing: antialiased; }
+    body { font-family: 'Noto Sans JP', sans-serif; background-color: #f8fafc; -webkit-font-smoothing: antialiased; }
     .mono { font-family: 'Roboto Mono', monospace; }
     
     /* フラッシュアニメーション */
@@ -33,28 +33,24 @@
 <div class="w-full md:max-w-3xl mx-auto bg-white md:shadow-xl md:rounded-xl overflow-hidden border-b md:border border-slate-200 md:mt-8">
     
     <!-- ヘッダー -->
-    <div class="bg-slate-800 text-white p-5 md:rounded-t-xl">
+    <div class="bg-indigo-900 text-white p-5 md:rounded-t-xl">
         <h2 class="text-lg md:text-xl font-bold flex items-center gap-2">
-            📉 KTC短期トレード収支試算表
+            🚀 短期トレード 収支シミュレーター
         </h2>
-        <p class="text-xs text-slate-400 mt-1">10分割ピラミッティング方式・実績データ準拠</p>
+        <p class="text-xs text-indigo-200 mt-1">10分割ピラミッティング方式・期待収益試算</p>
     </div>
 
     <div class="p-4 md:p-8 space-y-8">
         
         <!-- 基本設定エリア -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
             <div>
                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1">運用資金 (円)</label>
-                <input type="text" id="capital" value="1,000,000" oninput="formatCurrencyInput(this)" class="mono w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-right font-bold text-lg bg-slate-50 focus:bg-white transition">
+                <input type="text" id="capital" value="1,000,000" oninput="formatCurrencyInput(this)" class="mono w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-right font-bold text-lg bg-slate-50 focus:bg-white transition">
             </div>
             <div>
                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1">1回の利幅目標 (%)</label>
-                <input type="number" id="profitRate" value="3.0" step="0.1" class="mono w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-right font-bold text-lg bg-slate-50 focus:bg-white transition">
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">月額経費 (会費等)</label>
-                <input type="text" id="cost" value="20,000" oninput="formatCurrencyInput(this)" class="mono w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-right font-bold text-lg bg-slate-50 focus:bg-white transition">
+                <input type="number" id="profitRate" value="3.0" step="0.1" class="mono w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-right font-bold text-lg bg-slate-50 focus:bg-white transition">
             </div>
         </div>
 
@@ -65,15 +61,15 @@
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
                 <h3 class="font-bold text-sm text-slate-700 flex items-center gap-1">
                     <span>⚡️ 相場環境を選択</span>
-                    <span class="text-[10px] font-normal bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">自動入力</span>
+                    <span class="text-[10px] font-normal bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full">自動入力</span>
                 </h3>
                 
                 <!-- 根拠データボタン -->
-                <button onclick="toggleModal()" class="w-full md:w-auto text-xs font-bold bg-indigo-600 text-white px-4 py-2 rounded-full hover:bg-indigo-700 transition shadow-md flex items-center justify-center gap-2 transform active:scale-95">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+                <button onclick="toggleModal()" class="w-full md:w-auto text-xs font-bold bg-white border border-slate-300 text-slate-600 px-4 py-2 rounded-full hover:bg-slate-50 transition shadow-sm flex items-center justify-center gap-2 transform active:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-slate-400">
                         <path d="M15.5 2A1.5 1.5 0 0 0 14 3.5v8a1.5 1.5 0 0 0 1.5 1.5h3.5a1.5 1.5 0 0 0 1.5-1.5v-8A1.5 1.5 0 0 0 19 2h-3.5ZM13 4.5V14a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2ZM10 9v3.5a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 12.5v-3.5A1.5 1.5 0 0 1 5 7.5h3.5A1.5 1.5 0 0 1 10 9Z" />
                     </svg>
-                    <span>過去の全期間データを見る</span>
+                    <span>過去の実績データを見る</span>
                 </button>
             </div>
 
@@ -122,24 +118,11 @@
         </div>
 
         <!-- 結果表示エリア -->
-        <div class="bg-slate-900 text-white rounded-xl p-6 shadow-lg">
-            <div class="grid grid-cols-2 gap-4 mb-6">
-                <div>
-                    <p class="text-xs text-slate-400 uppercase tracking-wider mb-1">月間 粗利益</p>
-                    <p class="mono text-lg font-bold text-emerald-400" id="gross-profit">0</p>
-                </div>
-                <div class="text-right">
-                    <p class="text-xs text-slate-400 uppercase tracking-wider mb-1">コスト</p>
-                    <p class="mono text-lg font-bold text-rose-400" id="display-cost">0</p>
-                </div>
-            </div>
-            
-            <div class="border-t border-slate-700 pt-4">
-                <p class="text-sm text-slate-300 mb-1 text-center">最終月間収支 (Net Profit)</p>
-                <p class="mono text-4xl md:text-5xl font-bold text-center tracking-tight" id="net-profit">0</p>
-                <div class="text-center mt-4">
-                    <span id="status-badge" class="text-xs px-3 py-1 rounded-full font-bold">---</span>
-                </div>
+        <div class="bg-indigo-900 text-white rounded-xl p-6 shadow-lg">
+            <div class="text-center pt-2">
+                <p class="text-sm text-indigo-200 mb-1 uppercase tracking-widest">Total Monthly Profit</p>
+                <p class="text-sm md:text-base mb-2 opacity-80">月間 予想収益</p>
+                <p class="mono text-4xl md:text-6xl font-bold tracking-tight text-white" id="gross-profit">0</p>
             </div>
         </div>
 
@@ -323,7 +306,7 @@
                     <td class="p-2 font-mono text-blue-600 text-right text-xs md:text-sm" id="win-profit-${index}">0</td>
                     <td class="p-2 text-center">
                         <input type="number" min="0" id="win-input-${index}" 
-                            class="mono w-12 p-1 border border-slate-300 rounded text-center focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none bg-white bg-opacity-70 transition-colors"
+                            class="mono w-12 p-1 border border-slate-300 rounded text-center focus:ring-2 focus:ring-indigo-500 focus:bg-white outline-none bg-white bg-opacity-70 transition-colors"
                             oninput="calculate()">
                     </td>
                 </tr>
@@ -393,7 +376,6 @@
     function calculate() {
         const capital = getNum('capital');
         const profitRate = getNum('profitRate') / 100;
-        const cost = getNum('cost');
 
         let totalGross = 0;
 
@@ -409,30 +391,7 @@
             totalGross += oneWinProfit * wins;
         });
 
-        const netProfit = totalGross - cost;
-
         document.getElementById('gross-profit').textContent = '+' + fmt(Math.floor(totalGross)) + ' 円';
-        document.getElementById('display-cost').textContent = '▲' + fmt(cost) + ' 円';
-        
-        const netEl = document.getElementById('net-profit');
-        const sign = netProfit > 0 ? '+' : '';
-        netEl.textContent = sign + fmt(Math.floor(netProfit)) + ' 円';
-        
-        const badgeEl = document.getElementById('status-badge');
-
-        if (netProfit > 0) {
-            netEl.className = "mono text-4xl md:text-5xl font-bold text-center tracking-tight text-emerald-400";
-            badgeEl.textContent = "🎉 黒字達成 (Excellent)";
-            badgeEl.className = "text-xs px-3 py-1 rounded-full font-bold bg-emerald-900 text-emerald-300";
-        } else if (netProfit === 0) {
-            netEl.className = "mono text-4xl md:text-5xl font-bold text-center tracking-tight text-slate-400";
-            badgeEl.textContent = "⚖️ プラマイゼロ";
-            badgeEl.className = "text-xs px-3 py-1 rounded-full font-bold bg-slate-700 text-slate-300";
-        } else {
-            netEl.className = "mono text-4xl md:text-5xl font-bold text-center tracking-tight text-rose-400";
-            badgeEl.textContent = "⚠️ 会費負け (Loss)";
-            badgeEl.className = "text-xs px-3 py-1 rounded-full font-bold bg-rose-900 text-rose-300";
-        }
     }
 
     function toggleModal() {
@@ -463,4 +422,3 @@
 
 </body>
 </html>
-
