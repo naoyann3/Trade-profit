@@ -2,396 +2,44 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>KTCトレード収支試算表</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-    body { font-family: 'Noto Sans JP', sans-serif; background-color: #f8fafc; }
+    body { font-family: 'Noto Sans JP', sans-serif; background-color: #f1f5f9; -webkit-font-smoothing: antialiased; }
     .mono { font-family: 'Roboto Mono', monospace; }
-    /* スマホでの入力しやすさを調整 */
-    input[type="number"] { padding-right: 5px; }
     
-    /* モーダルのアニメーション */
+    /* フラッシュアニメーション（値変更時に光る） */
+    @keyframes flash-highlight {
+        0% { background-color: #fef08a; } /* yellow-200 */
+        100% { background-color: transparent; }
+    }
+    .flash-anim {
+        animation: flash-highlight 0.8s ease-out;
+    }
+
+    /* モーダルアニメーション */
     .modal { transition: opacity 0.25s ease; }
-    body.modal-active { overflow-x: hidden; overflow-y: hidden !important; }
+    body.modal-active { overflow: hidden; }
+
+    /* スマホでのテーブル調整 */
+    .min-w-custom { min-width: 340px; }
 </style>
 </head>
-<body class="p-2 md:p-8 text-slate-700">
+<body class="text-slate-700 pb-10">
 
-<div class="max-w-3xl mx-auto bg-white shadow-lg rounded-xl overflow-hidden border border-slate-200 relative z-0">
+<div class="w-full md:max-w-3xl mx-auto bg-white md:shadow-xl md:rounded-xl overflow-hidden border-b md:border border-slate-200 md:mt-8">
     
     <!-- ヘッダー -->
-    <div class="bg-slate-800 text-white p-5">
-        <h2 class="text-xl font-bold flex items-center gap-2">
-            📊 短期トレード収支試算表
+    <div class="bg-slate-800 text-white p-5 md:rounded-t-xl">
+        <h2 class="text-lg md:text-xl font-bold flex items-center gap-2">
+            📉 短期トレード収支試算表
         </h2>
-        <p class="text-xs text-slate-400 mt-1">10分割ピラミッティング方式・実績データ準拠</p>
+        <p class="text-xs text-slate-400 mt-1">10分割ピラミッティング方式・2025年基準</p>
     </div>
 
-    <div class="p-4 md:p-6 space-y-8">
+    <div class="p-4 md:p-8 space-y-8">
         
-        <!-- 基本設定エリア -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">運用資金 (円)</label>
-                <input type="text" id="capital" value="1,000,000" oninput="formatCurrencyInput(this)" class="mono w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none text-right font-bold text-lg">
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">1回の利幅目標 (%)</label>
-                <input type="number" id="profitRate" value="3.0" step="0.1" class="mono w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none text-right font-bold text-lg">
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">月額経費 (会費等)</label>
-                <input type="text" id="cost" value="20,000" oninput="formatCurrencyInput(this)" class="mono w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none text-right font-bold text-lg">
-            </div>
-        </div>
-
-        <hr class="border-slate-100">
-
-        <!-- プリセットボタンエリア -->
-        <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
-            <div class="flex justify-between items-center mb-3">
-                <h3 class="font-bold text-sm text-blue-800">⚡️ 相場環境プリセット (自動入力)</h3>
-                <button onclick="toggleModal()" class="text-xs bg-white border border-blue-200 text-blue-600 px-2 py-1 rounded hover:bg-blue-100 transition flex items-center gap-1">
-                    <span>📊 過去データを見る</span>
-                </button>
-            </div>
-            <div class="grid grid-cols-3 gap-2 text-xs md:text-sm">
-                <button onclick="applyPreset('bull')" class="bg-white hover:bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold py-2 px-2 rounded shadow-sm transition">
-                    🚀 攻めの相場<br><span class="font-normal text-xs opacity-80">(月 5.5回想定)</span>
-                </button>
-                <button onclick="applyPreset('avg')" class="bg-white hover:bg-blue-50 border border-blue-200 text-blue-700 font-bold py-2 px-2 rounded shadow-sm transition">
-                    ⚖️ 全期間平均<br><span class="font-normal text-xs opacity-80">(月 3.7回想定)</span>
-                </button>
-                <button onclick="applyPreset('bear')" class="bg-white hover:bg-slate-50 border border-slate-300 text-slate-600 font-bold py-2 px-2 rounded shadow-sm transition">
-                    ❄️ 冬の時代<br><span class="font-normal text-xs opacity-80">(月 2.1回想定)</span>
-                </button>
-            </div>
-            <p class="text-[10px] text-slate-400 mt-2 text-right">※実績ログより、浅い玉(1-3)と深い玉の発生比率を考慮して配分</p>
-        </div>
-
-        <!-- ピラミッティング入力エリア -->
-        <div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-left">
-                    <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b">
-                        <tr>
-                            <th class="p-2 w-12">玉No.</th>
-                            <th class="p-2 w-16">配分</th>
-                            <th class="p-2 text-right">投資金額</th>
-                            <th class="p-2 text-right">1回の利益</th>
-                            <th class="p-2 w-20 text-center">月間回数</th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-body">
-                        <!-- JSで自動生成 -->
-                    </tbody>
-                </table>
-            </div>
-            <p class="text-xs text-right text-slate-400 mt-2">資金配分率合計: <span id="total-allocation">0</span>%</p>
-        </div>
-
-        <!-- 結果表示エリア -->
-        <div class="bg-slate-100 rounded-lg p-5 border border-slate-200">
-            <div class="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                    <p class="text-xs text-slate-500">月間 粗利益 (Gross)</p>
-                    <p class="mono text-xl font-bold text-blue-600" id="gross-profit">0</p>
-                </div>
-                <div>
-                    <p class="text-xs text-slate-500">月間 経費 (Cost)</p>
-                    <p class="mono text-xl font-bold text-red-500" id="display-cost">0</p>
-                </div>
-            </div>
-            
-            <div class="border-t border-slate-300 pt-4">
-                <div class="flex justify-between items-end mb-1">
-                    <p class="font-bold text-slate-700">最終月間収支 (Net Profit)</p>
-                    <p class="mono text-3xl font-bold" id="net-profit">0</p>
-                </div>
-                <div class="text-right mt-2">
-                    <p class="text-xs text-slate-500" id="status-message">---</p>
-                </div>
-            </div>
-        </div>
-
-    </div>
-</div>
-
-<!-- データ参照モーダル -->
-<div id="data-modal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50">
-    <div class="modal-overlay absolute w-full h-full bg-gray-900 opacity-50" onclick="toggleModal()"></div>
-    
-    <div class="modal-container bg-white w-11/12 md:max-w-2xl mx-auto rounded shadow-lg z-50 overflow-y-auto max-h-[90vh]">
-        <div class="modal-content py-4 text-left px-6">
-            <!-- Title -->
-            <div class="flex justify-between items-center pb-3 border-b">
-                <p class="text-lg font-bold">📊 BTC月間平均決済回数 (実績データ)</p>
-                <div class="cursor-pointer z-50" onclick="toggleModal()">
-                    <svg class="fill-current text-black" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18">
-                        <path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"></path>
-                    </svg>
-                </div>
-            </div>
-
-            <!-- Body -->
-            <div class="my-5 text-sm text-slate-600 space-y-6">
-                <p class="text-xs bg-yellow-50 p-2 rounded text-yellow-800">
-                    ※主催者（自由億）のトレードログより「BTCの決済（利確・損切り）」のみを抽出・集計したデータです。<br>
-                    ※シミュレーター入力の参考にしてください。
-                </p>
-
-                <div>
-                    <h4 class="font-bold mb-2 text-slate-800">📌 年度別 平均回数</h4>
-                    <table class="w-full text-center border-collapse border border-slate-200">
-                        <tr class="bg-slate-100 text-xs">
-                            <th class="border p-2">年度</th>
-                            <th class="border p-2">月間平均</th>
-                            <th class="border p-2">相場環境</th>
-                        </tr>
-                        <tr>
-                            <td class="border p-2">2025年</td>
-                            <td class="border p-2 font-bold text-blue-600">5.5回</td>
-                            <td class="border p-2 text-xs text-left">バブル・高回転</td>
-                        </tr>
-                        <tr>
-                            <td class="border p-2">2024年</td>
-                            <td class="border p-2 font-bold">4.0回</td>
-                            <td class="border p-2 text-xs text-left">半減期前後・上昇</td>
-                        </tr>
-                        <tr>
-                            <td class="border p-2">2023年</td>
-                            <td class="border p-2">3.2回</td>
-                            <td class="border p-2 text-xs text-left">レンジ・回復期</td>
-                        </tr>
-                        <tr>
-                            <td class="border p-2">2022年</td>
-                            <td class="border p-2 text-slate-400">2.1回</td>
-                            <td class="border p-2 text-xs text-left">冬の時代・耐え</td>
-                        </tr>
-                        <tr class="bg-slate-50 font-bold">
-                            <td class="border p-2">全期間</td>
-                            <td class="border p-2">3.7回</td>
-                            <td class="border p-2 text-xs text-left">平均値</td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div>
-                    <h4 class="font-bold mb-2 text-slate-800">📅 月別 詳細データ</h4>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-center text-xs border-collapse border border-slate-200">
-                            <thead class="bg-slate-100">
-                                <tr>
-                                    <th class="border p-1">年</th>
-                                    <th class="border p-1">1月</th><th class="border p-1">2月</th><th class="border p-1">3月</th>
-                                    <th class="border p-1">4月</th><th class="border p-1">5月</th><th class="border p-1">6月</th>
-                                    <th class="border p-1">7月</th><th class="border p-1">8月</th><th class="border p-1">9月</th>
-                                    <th class="border p-1">10月</th><th class="border p-1">11月</th><th class="border p-1">12月</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="border p-1 font-bold">2025</td>
-                                    <td class="border p-1">4</td><td class="border p-1">4</td><td class="border p-1">5</td>
-                                    <td class="border p-1">4</td><td class="border p-1">5</td><td class="border p-1">5</td>
-                                    <td class="border p-1">6</td><td class="border p-1 bg-blue-100">7</td><td class="border p-1">6</td>
-                                    <td class="border p-1">7</td><td class="border p-1 bg-blue-100">8</td><td class="border p-1">-</td>
-                                </tr>
-                                <tr>
-                                    <td class="border p-1 font-bold">2024</td>
-                                    <td class="border p-1">3</td><td class="border p-1">4</td><td class="border p-1">5</td>
-                                    <td class="border p-1">3</td><td class="border p-1">4</td><td class="border p-1">4</td>
-                                    <td class="border p-1">5</td><td class="border p-1">3</td><td class="border p-1">3</td>
-                                    <td class="border p-1">4</td><td class="border p-1">5</td><td class="border p-1">5</td>
-                                </tr>
-                                <tr>
-                                    <td class="border p-1 font-bold">2023</td>
-                                    <td class="border p-1">2</td><td class="border p-1">3</td><td class="border p-1">4</td>
-                                    <td class="border p-1">4</td><td class="border p-1">2</td><td class="border p-1">4</td>
-                                    <td class="border p-1">4</td><td class="border p-1">3</td><td class="border p-1">3</td>
-                                    <td class="border p-1">3</td><td class="border p-1">3</td><td class="border p-1">3</td>
-                                </tr>
-                                <tr>
-                                    <td class="border p-1 font-bold">2022</td>
-                                    <td class="border p-1">2</td><td class="border p-1">3</td><td class="border p-1">3</td>
-                                    <td class="border p-1 text-slate-300">1</td><td class="border p-1 text-slate-300">1</td><td class="border p-1">2</td>
-                                    <td class="border p-1">2</td><td class="border p-1">2</td><td class="border p-1">2</td>
-                                    <td class="border p-1">2</td><td class="border p-1 text-slate-300">1</td><td class="border p-1">2</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Footer -->
-            <div class="flex justify-end pt-2">
-                <button onclick="toggleModal()" class="px-4 py-2 bg-slate-500 p-3 rounded-lg text-white hover:bg-slate-400 text-sm">閉じる</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    // タケさん式ピラミッティング配分
-    const allocations = [2, 3, 5, 7, 8, 10, 12, 15, 18, 20];
-    
-    // プリセット定義 (浅い玉中心の比率で構成)
-    // logic: 利益の85%は1-3玉目。深い玉は稀。
-    const presets = {
-        // 2025年バブル (月平均 5.5回)
-        bull: [3, 2, 1, 0, 0, 0, 0, 0, 0, 0], 
-        // 全期間平均 (月平均 3.7回)
-        avg:  [2, 1, 1, 0, 0, 0, 0, 0, 0, 0],
-        // 2022年冬 (月平均 2.1回)
-        bear: [1, 1, 0, 0, 0, 0, 0, 0, 0, 0]
-    };
-
-    // 初期表示は「平均」を使用
-    let currentWins = [...presets.avg];
-
-    function init() {
-        const tbody = document.getElementById('table-body');
-        let html = '';
-        
-        allocations.forEach((rate, index) => {
-            // 1-3玉目を強調表示
-            const highlight = index < 3 ? 'bg-yellow-50' : '';
-            const fontStyle = index < 3 ? 'font-bold text-slate-700' : 'text-slate-400';
-
-            html += `
-                <tr class="border-b hover:bg-slate-50 transition ${highlight}">
-                    <td class="p-2 font-mono ${fontStyle} text-center">#${index + 1}</td>
-                    <td class="p-2 font-mono text-slate-500 text-center">${rate}%</td>
-                    <td class="p-2 font-mono font-bold text-right" id="amount-${index}">0</td>
-                    <td class="p-2 font-mono text-blue-600 text-right" id="win-profit-${index}">0</td>
-                    <td class="p-2">
-                        <input type="number" min="0" id="win-input-${index}" 
-                            class="mono w-full p-1 border border-slate-300 rounded text-center focus:bg-blue-50 outline-none win-input"
-                            oninput="calculate()">
-                    </td>
-                </tr>
-            `;
-        });
-        tbody.innerHTML = html;
-        
-        document.getElementById('total-allocation').textContent = allocations.reduce((a, b) => a + b, 0);
-        
-        // 初期値をセット
-        applyWinsToInputs(currentWins);
-        calculate();
-    }
-
-    // プリセット適用ボタン
-    function applyPreset(type) {
-        if (presets[type]) {
-            applyWinsToInputs(presets[type]);
-            calculate();
-        }
-    }
-
-    function applyWinsToInputs(winsArray) {
-        winsArray.forEach((val, idx) => {
-            const input = document.getElementById(`win-input-${idx}`);
-            if (input) {
-                input.value = val;
-            }
-        });
-        // 残りのinput（配列より多い分）は0にする
-        for (let i = winsArray.length; i < allocations.length; i++) {
-             const input = document.getElementById(`win-input-${i}`);
-             if (input) input.value = 0;
-        }
-    }
-
-    function fmt(num) {
-        return num.toLocaleString() + ' 円';
-    }
-
-    function formatCurrencyInput(input) {
-        let val = input.value.replace(/[^0-9]/g, '');
-        if (val === '') val = '0';
-        input.value = Number(val).toLocaleString();
-        calculate();
-    }
-
-    function getNum(id) {
-        const val = document.getElementById(id).value.replace(/[^0-9.]/g, '');
-        return Number(val);
-    }
-
-    function calculate() {
-        const capital = getNum('capital');
-        const profitRate = getNum('profitRate') / 100;
-        const cost = getNum('cost');
-
-        let totalGross = 0;
-        const winInputs = document.querySelectorAll('.win-input');
-
-        allocations.forEach((rate, index) => {
-            const investAmount = capital * (rate / 100);
-            document.getElementById(`amount-${index}`).textContent = Math.floor(investAmount).toLocaleString();
-
-            const oneWinProfit = investAmount * profitRate;
-            document.getElementById(`win-profit-${index}`).textContent = '+' + Math.floor(oneWinProfit).toLocaleString();
-
-            const wins = Number(winInputs[index].value);
-            totalGross += oneWinProfit * wins;
-        });
-
-        const netProfit = totalGross - cost;
-
-        document.getElementById('gross-profit').textContent = '+' + fmt(Math.floor(totalGross));
-        document.getElementById('display-cost').textContent = '▲' + fmt(cost);
-        
-        const netEl = document.getElementById('net-profit');
-        netEl.textContent = (netProfit > 0 ? '+' : '') + fmt(Math.floor(netProfit));
-        
-        const statusEl = document.getElementById('status-message');
-
-        if (netProfit > 0) {
-            netEl.className = "mono text-3xl font-bold text-emerald-600";
-            statusEl.textContent = "✅ コストを上回る利益が出ています";
-            statusEl.className = "text-xs text-emerald-600 font-bold";
-        } else if (netProfit === 0) {
-            netEl.className = "mono text-3xl font-bold text-slate-500";
-            statusEl.textContent = "収支トントンです";
-            statusEl.className = "text-xs text-slate-500";
-        } else {
-            netEl.className = "mono text-3xl font-bold text-rose-600";
-            statusEl.textContent = "⚠️ 利益よりも会費コストが上回っています";
-            statusEl.className = "text-xs text-rose-600 font-bold";
-        }
-    }
-
-    // モーダル制御
-    function toggleModal() {
-        const body = document.querySelector('body');
-        const modal = document.querySelector('.modal');
-        modal.classList.toggle('opacity-0');
-        modal.classList.toggle('pointer-events-none');
-        body.classList.toggle('modal-active');
-    }
-
-    // エスケープキーでモーダルを閉じる
-    document.onkeydown = function(evt) {
-        evt = evt || window.event;
-        var isEscape = false;
-        if ("key" in evt) {
-            isEscape = (evt.key === "Escape" || evt.key === "Esc");
-        } else {
-            isEscape = (evt.keyCode === 27);
-        }
-        if (isEscape && document.body.classList.contains('modal-active')) {
-            toggleModal();
-        }
-    };
-
-    document.getElementById('profitRate').addEventListener('input', calculate);
-    window.onload = init;
-</script>
-
-</body>
-</html>
+        <!-- 基本設定エリア (スマホ:1列 / PC:3列) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
