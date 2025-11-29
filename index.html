@@ -1,201 +1,209 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KTC 短期トレード 現実シミュレーター</title>
-    <meta name="description" content="トレードの期待値と時給を計算するツール">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap');
-        body { font-family: 'Noto Sans JP', sans-serif; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KTCトレード収支試算表</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+    body { font-family: 'Noto Sans JP', sans-serif; background-color: #f8fafc; }
+    .mono { font-family: 'Roboto Mono', monospace; }
+    input[type="number"]::-webkit-inner-spin-button, 
+    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+</style>
 </head>
-<body class="bg-slate-100 text-slate-800 p-4 min-h-screen flex items-center justify-center">
+<body class="p-4 md:p-8 text-slate-700">
 
-    <div class="max-w-xl w-full bg-white shadow-2xl rounded-2xl overflow-hidden border border-slate-200">
-        <!-- ヘッダー -->
-        <div class="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white text-center">
-            <h1 class="text-2xl font-bold mb-1">📉 KTC 現実シミュレーター</h1>
-            <p class="text-blue-100 text-sm opacity-90">そのトレード、本当に儲かってますか？</p>
-        </div>
-
-        <div class="p-6 space-y-6">
-            <!-- 入力エリア -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <!-- 投資元本 -->
-                <div class="space-y-1">
-                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">投資元本 (円)</label>
-                    <input type="text" inputmode="numeric" id="capital" value="600,000" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none transition font-mono text-lg text-right">
-                </div>
-                
-                <div class="space-y-1">
-                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">月利目標 (%)</label>
-                    <input type="number" id="roi" value="3.0" step="0.1" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none transition font-mono text-lg text-right">
-                </div>
-                
-                <!-- 会費 -->
-                <div class="space-y-1">
-                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">月額会費 (円)</label>
-                    <input type="text" inputmode="numeric" id="fee" value="20,000" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none transition font-mono text-lg text-right">
-                </div>
-                
-                <div class="space-y-1">
-                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">労働時間 (月/h)</label>
-                    <input type="number" id="hours" value="75" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none transition font-mono text-lg text-right">
-                </div>
-            </div>
-
-            <!-- 計算ボタン（念のため追加） -->
-            <button onclick="update()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow transition transform active:scale-95">
-                計算する
-            </button>
-
-            <!-- 計算結果 -->
-            <div class="bg-slate-50 rounded-xl p-5 border border-slate-200 space-y-3">
-                <div class="flex justify-between text-sm">
-                    <span class="text-slate-500">月間粗利益</span>
-                    <span class="font-mono font-bold text-blue-600" id="gross-profit">0 円</span>
-                </div>
-                <div class="flex justify-between text-sm">
-                    <span class="text-slate-500">会費コスト</span>
-                    <span class="font-mono font-bold text-red-500" id="fee-display">0 円</span>
-                </div>
-                <hr class="border-slate-200">
-                <div class="flex justify-between items-end">
-                    <span class="font-bold text-slate-700">最終手取り</span>
-                    <span class="font-mono text-3xl font-bold text-slate-800" id="net-profit">0 円</span>
-                </div>
-                <div class="flex justify-between items-center bg-white p-2 rounded border border-slate-100">
-                    <span class="text-xs font-bold text-slate-400 uppercase">実質時給</span>
-                    <span class="font-mono font-bold text-slate-600" id="hourly-wage">0 円/h</span>
-                </div>
-            </div>
-
-            <!-- 判定メッセージエリア -->
-            <div id="result-box" class="hidden rounded-lg p-4 border-l-4">
-                <h3 class="font-bold text-lg flex items-center gap-2" id="result-title"></h3>
-                <p class="text-sm mt-1 opacity-90" id="result-desc"></p>
-                <p class="text-xs font-mono mt-3 opacity-75 pt-2 border-t border-black/10" id="breakeven-text"></p>
-            </div>
-        </div>
-        
-        <div class="bg-slate-50 p-3 text-center text-xs text-slate-400 border-t border-slate-200">
-            Automated Calculation System
-        </div>
+<div class="max-w-3xl mx-auto bg-white shadow-lg rounded-xl overflow-hidden border border-slate-200">
+    
+    <!-- ヘッダー -->
+    <div class="bg-slate-800 text-white p-5">
+        <h2 class="text-xl font-bold flex items-center gap-2">
+            📊 短期トレード収支試算表
+        </h2>
+        <p class="text-xs text-slate-400 mt-1">10分割ピラミッティング方式対応</p>
     </div>
 
-    <script>
-        // 文字列から「数字とドット以外」をすべて削除して数値化する（より強力な処理）
-        const parseNum = (str) => {
-            if (!str) return 0;
-            // 全角数字を半角に変換
-            const halfWidth = String(str).replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
-            // 数字とドット以外（カンマや円マークなど）を全て削除
-            const cleanStr = halfWidth.replace(/[^0-9.]/g, '');
-            return Number(cleanStr);
-        };
+    <div class="p-6 space-y-8">
+        
+        <!-- 基本設定エリア -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">運用資金 (円)</label>
+                <input type="text" id="capital" value="1,000,000" oninput="formatCurrencyInput(this)" class="mono w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none text-right font-bold text-lg">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">1回の利幅目標 (%)</label>
+                <input type="number" id="profitRate" value="3.0" step="0.1" class="mono w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none text-right font-bold text-lg">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">月額経費 (会費等)</label>
+                <input type="text" id="cost" value="20,000" oninput="formatCurrencyInput(this)" class="mono w-full p-2 border border-slate-300 rounded focus:ring-2 focus:ring-blue-500 outline-none text-right font-bold text-lg">
+            </div>
+        </div>
 
-        // 数値をカンマ区切りの文字列にする関数
-        const fmtNum = (num) => {
-            return num.toLocaleString();
-        };
+        <hr class="border-slate-100">
 
-        // 入力時にカンマを自動付与する処理
-        const formatInput = (e) => {
-            const val = parseNum(e.target.value);
-            // 入力が空でない、かつ数値として有効な場合のみフォーマット
-            if (!isNaN(val) && e.target.value !== "") {
-                const formatted = fmtNum(val);
-                // カーソル飛びを防ぐため、値が変わる場合のみ更新
-                if (e.target.value.replace(/[^0-9]/g, '') !== formatted.replace(/[^0-9]/g, '')) {
-                     e.target.value = formatted;
-                }
-            }
-            update(); // 計算実行
-        };
-
-        function update() {
-            // 値の取得
-            const capital = parseNum(document.getElementById('capital').value);
-            const roi = Number(document.getElementById('roi').value);
-            const fee = parseNum(document.getElementById('fee').value);
-            const hours = Number(document.getElementById('hours').value) || 1;
-
-            // 計算
-            const gross = capital * (roi / 100);
-            const net = gross - fee;
-            const wage = net / hours;
-            const breakeven = (roi > 0) ? (fee / (roi / 100)) : 0;
-
-            // 表示フォーマット関数
-            const fmtYen = (n) => n.toLocaleString() + ' 円';
-
-            // DOM更新（計算結果がNaNにならないようにガード）
-            const safeGross = isNaN(gross) ? 0 : gross;
-            const safeNet = isNaN(net) ? 0 : net;
-            const safeWage = isNaN(wage) ? 0 : wage;
-            const safeFee = isNaN(fee) ? 0 : fee;
-
-            document.getElementById('gross-profit').textContent = '+' + fmtYen(Math.floor(safeGross));
-            document.getElementById('fee-display').textContent = '▲' + fmtYen(safeFee);
+        <!-- ピラミッティング入力エリア -->
+        <div>
+            <h3 class="font-bold text-sm text-slate-700 mb-3 flex justify-between items-end">
+                <span>月間トレード実績入力</span>
+                <span class="text-xs text-slate-400 font-normal">※下に行くほど深い位置での約定</span>
+            </h3>
             
-            const netEl = document.getElementById('net-profit');
-            netEl.textContent = (safeNet > 0 ? '+' : '') + fmtYen(Math.floor(safeNet));
-            netEl.className = `font-mono text-3xl font-bold ${safeNet > 0 ? 'text-emerald-600' : 'text-rose-600'}`;
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                    <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b">
+                        <tr>
+                            <th class="p-2 w-16">玉No.</th>
+                            <th class="p-2 w-20">配分率</th>
+                            <th class="p-2">投資金額</th>
+                            <th class="p-2">1勝の利益</th>
+                            <th class="p-2 w-24">月間勝数</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <!-- JSで自動生成 -->
+                    </tbody>
+                </table>
+            </div>
+            <p class="text-xs text-right text-slate-400 mt-2">配分率合計: <span id="total-allocation">0</span>%</p>
+        </div>
+
+        <!-- 労働時間設定 -->
+        <div class="flex items-center justify-end gap-4 bg-slate-50 p-3 rounded">
+            <label class="text-xs font-bold text-slate-500">想定労働時間 (月/h)</label>
+            <div class="flex items-center gap-2">
+                <input type="number" id="hours" value="60" class="mono w-20 p-1 border border-slate-300 rounded text-right">
+                <span class="text-xs text-slate-400">時間</span>
+            </div>
+        </div>
+
+        <!-- 結果表示エリア -->
+        <div class="bg-slate-100 rounded-lg p-5 border border-slate-200">
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <p class="text-xs text-slate-500">月間 粗利益</p>
+                    <p class="mono text-xl font-bold text-blue-600" id="gross-profit">0</p>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-500">経費 (会費)</p>
+                    <p class="mono text-xl font-bold text-red-500" id="display-cost">0</p>
+                </div>
+            </div>
             
-            document.getElementById('hourly-wage').textContent = fmtYen(Math.floor(safeWage)) + ' /h';
+            <div class="border-t border-slate-300 pt-4">
+                <div class="flex justify-between items-end mb-1">
+                    <p class="font-bold text-slate-700">最終損益 (Net Profit)</p>
+                    <p class="mono text-3xl font-bold" id="net-profit">0</p>
+                </div>
+                <div class="flex justify-end items-center gap-2">
+                    <span class="text-xs text-slate-400">労働時給換算:</span>
+                    <span class="mono font-bold text-slate-600" id="hourly-wage">0</span>
+                </div>
+            </div>
+        </div>
 
-            // 判定ロジック
-            const box = document.getElementById('result-box');
-            const title = document.getElementById('result-title');
-            const desc = document.getElementById('result-desc');
-            const beText = document.getElementById('breakeven-text');
+    </div>
+</div>
 
-            box.classList.remove('hidden', 'bg-emerald-100', 'border-emerald-500', 'text-emerald-800', 'bg-rose-100', 'border-rose-500', 'text-rose-800', 'bg-amber-100', 'border-amber-500', 'text-amber-800');
+<script>
+    // タケさん式ピラミッティング配分
+    const allocations = [2, 3, 5, 7, 8, 10, 12, 15, 18, 20];
+    
+    // 初期値としての月間勝数（例：浅い玉は多く、深い玉は少なく）
+    const defaultWins = [3, 2, 1, 1, 0, 0, 0, 0, 0, 0];
 
-            if (safeNet > 0) {
-                if (safeWage < 1050) {
-                    // 黒字だが時給が低い
-                    box.classList.add('bg-amber-100', 'border-amber-500', 'text-amber-800');
-                    title.textContent = "⚠️ コンビニバイト以下";
-                    desc.textContent = `黒字ですが、時給換算で ${Math.floor(safeWage)}円 です。リスクを負ってチャートを見るより、安全なバイトの方が稼げます。`;
-                    beText.textContent = "";
-                } else {
-                    // 完全勝利
-                    box.classList.add('bg-emerald-100', 'border-emerald-500', 'text-emerald-800');
-                    title.textContent = "🚀 労働の対価あり";
-                    desc.textContent = "おめでとうございます。立派なトレーダーです。";
-                    beText.textContent = "";
-                }
-            } else {
-                // 赤字（養分）
-                box.classList.add('bg-rose-100', 'border-rose-500', 'text-rose-800');
-                title.textContent = "💀 あなたは「養分」です";
-                desc.textContent = "会費負けしています。運営に寄付をしている状態です。";
-                beText.textContent = `損益分岐点（最低必要元本）: ${fmtYen(Math.floor(breakeven))}`;
-            }
-        }
+    function init() {
+        const tbody = document.getElementById('table-body');
+        let html = '';
+        
+        allocations.forEach((rate, index) => {
+            html += `
+                <tr class="border-b hover:bg-slate-50 transition">
+                    <td class="p-2 font-mono text-slate-400">#${index + 1}</td>
+                    <td class="p-2 font-mono text-slate-500">${rate}%</td>
+                    <td class="p-2 font-mono font-bold" id="amount-${index}">0</td>
+                    <td class="p-2 font-mono text-blue-600" id="win-profit-${index}">0</td>
+                    <td class="p-2">
+                        <input type="number" min="0" value="${defaultWins[index]}" 
+                            class="mono w-full p-1 border border-slate-300 rounded text-center focus:bg-blue-50 outline-none win-input"
+                            oninput="calculate()">
+                    </td>
+                </tr>
+            `;
+        });
+        tbody.innerHTML = html;
+        
+        // 合計配分率表示
+        document.getElementById('total-allocation').textContent = allocations.reduce((a, b) => a + b, 0);
 
-        // イベントリスナー設定
-        const capitalInput = document.getElementById('capital');
-        const feeInput = document.getElementById('fee');
+        calculate();
+    }
 
-        // フォーカスが外れた時にもフォーマットを整える
-        capitalInput.addEventListener('blur', formatInput);
-        feeInput.addEventListener('blur', formatInput);
+    // 数値フォーマット（カンマ区切り）
+    function fmt(num) {
+        return num.toLocaleString() + ' 円';
+    }
 
-        // 入力中はリアルタイム更新
-        capitalInput.addEventListener('input', formatInput);
-        feeInput.addEventListener('input', formatInput);
+    // 入力欄のカンマ処理
+    function formatCurrencyInput(input) {
+        let val = input.value.replace(/[^0-9]/g, '');
+        if (val === '') val = '0';
+        input.value = Number(val).toLocaleString();
+        calculate();
+    }
 
-        document.getElementById('roi').addEventListener('input', update);
-        document.getElementById('hours').addEventListener('input', update);
+    function getNum(id) {
+        const val = document.getElementById(id).value.replace(/[^0-9.]/g, '');
+        return Number(val);
+    }
 
-        // ページ読み込み完了時に計算を実行
-        window.onload = function() {
-            update();
-        };
-    </script>
+    function calculate() {
+        const capital = getNum('capital');
+        const profitRate = getNum('profitRate') / 100;
+        const cost = getNum('cost');
+        const hours = getNum('hours');
+
+        let totalGross = 0;
+        const winInputs = document.querySelectorAll('.win-input');
+
+        allocations.forEach((rate, index) => {
+            // 各玉の投資額
+            const investAmount = capital * (rate / 100);
+            document.getElementById(`amount-${index}`).textContent = Math.floor(investAmount).toLocaleString();
+
+            // 1勝あたりの利益
+            const oneWinProfit = investAmount * profitRate;
+            document.getElementById(`win-profit-${index}`).textContent = '+' + Math.floor(oneWinProfit).toLocaleString();
+
+            // 月間勝数に基づく利益
+            const wins = Number(winInputs[index].value);
+            totalGross += oneWinProfit * wins;
+        });
+
+        // 結果表示
+        const netProfit = totalGross - cost;
+        const hourlyWage = hours > 0 ? netProfit / hours : 0;
+
+        document.getElementById('gross-profit').textContent = '+' + fmt(Math.floor(totalGross));
+        document.getElementById('display-cost').textContent = '▲' + fmt(cost);
+        
+        const netEl = document.getElementById('net-profit');
+        netEl.textContent = (netProfit > 0 ? '+' : '') + fmt(Math.floor(netProfit));
+        netEl.className = `mono text-3xl font-bold ${netProfit > 0 ? 'text-emerald-600' : 'text-rose-600'}`;
+
+        document.getElementById('hourly-wage').textContent = fmt(Math.floor(hourlyWage));
+    }
+
+    // イベントリスナー
+    document.getElementById('profitRate').addEventListener('input', calculate);
+    document.getElementById('hours').addEventListener('input', calculate);
+
+    // 初期化
+    window.onload = init;
+</script>
+
 </body>
 </html>
