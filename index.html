@@ -25,6 +25,7 @@
 
     /* スマホでのテーブル調整 */
     .min-w-custom { min-width: 340px; }
+    .min-w-heatmap { min-width: 500px; }
 </style>
 </head>
 <body class="text-slate-700 pb-10">
@@ -72,7 +73,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
                         <path d="M15.5 2A1.5 1.5 0 0 0 14 3.5v8a1.5 1.5 0 0 0 1.5 1.5h3.5a1.5 1.5 0 0 0 1.5-1.5v-8A1.5 1.5 0 0 0 19 2h-3.5ZM13 4.5V14a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2ZM10 9v3.5a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 12.5v-3.5A1.5 1.5 0 0 1 5 7.5h3.5A1.5 1.5 0 0 1 10 9Z" />
                     </svg>
-                    <span>過去の約定データを見る</span>
+                    <span>過去の全期間データを見る</span>
                 </button>
             </div>
 
@@ -149,9 +150,9 @@
 <div id="data-modal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50 px-4">
     <div class="modal-overlay absolute w-full h-full bg-black opacity-60" onclick="toggleModal()"></div>
     
-    <div class="modal-container bg-white w-full max-w-lg mx-auto rounded-xl shadow-2xl z-50 overflow-hidden transform transition-all scale-95">
+    <div class="modal-container bg-white w-full max-w-3xl mx-auto rounded-xl shadow-2xl z-50 overflow-hidden transform transition-all scale-95 flex flex-col max-h-[90vh]">
         <!-- Title -->
-        <div class="bg-slate-50 px-5 py-3 border-b border-slate-100 flex justify-between items-center">
+        <div class="bg-slate-50 px-5 py-4 border-b border-slate-100 flex justify-between items-center shrink-0">
             <p class="font-bold text-slate-700 flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-indigo-600">
                     <path d="M15.5 2A1.5 1.5 0 0 0 14 3.5v8a1.5 1.5 0 0 0 1.5 1.5h3.5a1.5 1.5 0 0 0 1.5-1.5v-8A1.5 1.5 0 0 0 19 2h-3.5ZM13 4.5V14a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2ZM10 9v3.5a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 12.5v-3.5A1.5 1.5 0 0 1 5 7.5h3.5A1.5 1.5 0 0 1 10 9Z" />
@@ -163,61 +164,110 @@
             </button>
         </div>
 
-        <!-- Content -->
-        <div class="p-5 overflow-y-auto max-h-[70vh] text-sm">
-            <div class="mb-6">
-                <h4 class="text-xs font-bold text-slate-400 uppercase mb-2">年度別 月間平均決済回数</h4>
-                <div class="space-y-2">
-                    <div class="flex justify-between items-center p-3 bg-rose-50 rounded-lg border border-rose-100">
-                        <span class="font-bold text-rose-800">2025年 (バブル期)</span>
-                        <span class="mono font-bold text-lg text-rose-600">5.5回</span>
+        <!-- Content (Scrollable) -->
+        <div class="p-5 overflow-y-auto text-sm flex-grow">
+            
+            <div class="mb-8">
+                <h4 class="text-xs font-bold text-slate-400 uppercase mb-3 flex items-center gap-2">
+                    <span>📅 年度別・相場環境サマリー</span>
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div class="p-3 bg-rose-50 rounded-lg border border-rose-100 shadow-sm">
+                        <div class="flex justify-between items-baseline mb-1">
+                            <span class="font-bold text-rose-800">2025年 (バブル期)</span>
+                            <span class="mono font-bold text-xl text-rose-600">5.5回<span class="text-xs ml-1 text-rose-400">/月</span></span>
+                        </div>
+                        <p class="text-xs text-rose-700 opacity-80">上昇相場。浅い押し目での高回転トレードが主。</p>
                     </div>
-                    <div class="flex justify-between items-center p-3 bg-orange-50 rounded-lg border border-orange-100">
-                        <span class="text-orange-800 font-bold">2024年 (上昇期)</span>
-                        <span class="mono font-bold text-orange-600">4.0回</span>
+                    <div class="p-3 bg-orange-50 rounded-lg border border-orange-100 shadow-sm">
+                        <div class="flex justify-between items-baseline mb-1">
+                            <span class="font-bold text-orange-800">2024年 (上昇・調整)</span>
+                            <span class="mono font-bold text-xl text-orange-600">4.0回<span class="text-xs ml-1 text-orange-400">/月</span></span>
+                        </div>
+                        <p class="text-xs text-orange-700 opacity-80">半減期前後。ボラティリティが高い時期。</p>
                     </div>
-                    <div class="flex justify-between items-center p-3 bg-emerald-50 rounded-lg border border-emerald-100">
-                        <span class="text-emerald-800">2022年 (冬の時代)</span>
-                        <span class="mono font-bold text-emerald-600">2.1回</span>
+                    <div class="p-3 bg-blue-50 rounded-lg border border-blue-100 shadow-sm">
+                        <div class="flex justify-between items-baseline mb-1">
+                            <span class="font-bold text-blue-800">2023年 (回復期)</span>
+                            <span class="mono font-bold text-xl text-blue-600">3.2回<span class="text-xs ml-1 text-blue-400">/月</span></span>
+                        </div>
+                        <p class="text-xs text-blue-700 opacity-80">レンジ相場。「恐怖で買い、楽観で売る」時期。</p>
                     </div>
-                    <div class="flex justify-between items-center p-2 border-t border-slate-100 mt-1 pt-3">
-                        <span class="text-xs font-bold text-slate-500">全期間平均</span>
-                        <span class="mono font-bold text-slate-700">3.7回</span>
+                    <div class="p-3 bg-slate-100 rounded-lg border border-slate-200 shadow-sm">
+                        <div class="flex justify-between items-baseline mb-1">
+                            <span class="font-bold text-slate-700">2022年 (冬の時代)</span>
+                            <span class="mono font-bold text-xl text-slate-600">2.1回<span class="text-xs ml-1 text-slate-400">/月</span></span>
+                        </div>
+                        <p class="text-xs text-slate-600 opacity-80">下落相場。耐える時期。決済回数は激減。</p>
                     </div>
                 </div>
             </div>
 
             <div>
-                <h4 class="text-xs font-bold text-slate-400 uppercase mb-2">月別詳細 (ヒートマップ)</h4>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-center text-xs border-collapse">
-                        <thead>
-                            <tr class="bg-slate-100 text-slate-500">
-                                <th class="p-1 border">年</th>
-                                <th class="p-1 border">Q1</th><th class="p-1 border">Q2</th><th class="p-1 border">Q3</th><th class="p-1 border">Q4</th>
+                <h4 class="text-xs font-bold text-slate-400 uppercase mb-3 flex justify-between items-center">
+                    <span>📊 月別 詳細ヒートマップ</span>
+                    <span class="text-[10px] font-normal bg-slate-100 px-2 py-1 rounded text-slate-500">← 横スクロール →</span>
+                </h4>
+                <div class="overflow-x-auto border border-slate-200 rounded-lg shadow-sm">
+                    <table class="w-full text-center text-xs border-collapse min-w-heatmap">
+                        <thead class="bg-slate-50 text-slate-500 font-bold">
+                            <tr>
+                                <th class="p-2 border-b border-r text-left pl-3">年</th>
+                                <th class="p-2 border-b">1月</th><th class="p-2 border-b">2月</th><th class="p-2 border-b">3月</th>
+                                <th class="p-2 border-b">4月</th><th class="p-2 border-b">5月</th><th class="p-2 border-b">6月</th>
+                                <th class="p-2 border-b">7月</th><th class="p-2 border-b">8月</th><th class="p-2 border-b">9月</th>
+                                <th class="p-2 border-b">10月</th><th class="p-2 border-b">11月</th><th class="p-2 border-b">12月</th>
                             </tr>
                         </thead>
                         <tbody class="mono">
-                            <tr>
-                                <td class="p-1 border font-bold bg-slate-50">2025</td>
-                                <td class="p-1 border">4.3</td><td class="p-1 border">5.0</td><td class="p-1 border bg-rose-100 font-bold text-rose-700">6.3</td><td class="p-1 border bg-rose-50">7.5</td>
+                            <tr class="hover:bg-rose-50/30">
+                                <td class="p-2 border-b border-r font-bold text-left pl-3 bg-slate-50">2025</td>
+                                <td class="p-2 border-b">4</td><td class="p-2 border-b">4</td><td class="p-2 border-b">5</td>
+                                <td class="p-2 border-b">4</td><td class="p-2 border-b">5</td><td class="p-2 border-b">5</td>
+                                <td class="p-2 border-b bg-rose-100 text-rose-700 font-bold">6</td><td class="p-2 border-b bg-rose-200 text-rose-800 font-bold">7</td><td class="p-2 border-b bg-rose-100 text-rose-700 font-bold">6</td>
+                                <td class="p-2 border-b bg-rose-200 text-rose-800 font-bold">7</td><td class="p-2 border-b bg-rose-200 text-rose-800 font-bold">8</td><td class="p-2 border-b text-slate-300">-</td>
                             </tr>
-                             <tr>
-                                <td class="p-1 border font-bold bg-slate-50">2024</td>
-                                <td class="p-1 border">4.0</td><td class="p-1 border">3.6</td><td class="p-1 border">3.6</td><td class="p-1 border">4.6</td>
+                            <tr class="hover:bg-orange-50/30">
+                                <td class="p-2 border-b border-r font-bold text-left pl-3 bg-slate-50">2024</td>
+                                <td class="p-2 border-b">3</td><td class="p-2 border-b">4</td><td class="p-2 border-b bg-orange-100 text-orange-700 font-bold">5</td>
+                                <td class="p-2 border-b">3</td><td class="p-2 border-b">4</td><td class="p-2 border-b">4</td>
+                                <td class="p-2 border-b bg-orange-100 text-orange-700 font-bold">5</td><td class="p-2 border-b">3</td><td class="p-2 border-b">3</td>
+                                <td class="p-2 border-b">4</td><td class="p-2 border-b bg-orange-100 text-orange-700 font-bold">5</td><td class="p-2 border-b bg-orange-100 text-orange-700 font-bold">5</td>
+                            </tr>
+                            <tr class="hover:bg-blue-50/30">
+                                <td class="p-2 border-b border-r font-bold text-left pl-3 bg-slate-50">2023</td>
+                                <td class="p-2 border-b text-slate-400">2</td><td class="p-2 border-b">3</td><td class="p-2 border-b">4</td>
+                                <td class="p-2 border-b">4</td><td class="p-2 border-b text-slate-400">2</td><td class="p-2 border-b">4</td>
+                                <td class="p-2 border-b">4</td><td class="p-2 border-b">3</td><td class="p-2 border-b">3</td>
+                                <td class="p-2 border-b">3</td><td class="p-2 border-b">3</td><td class="p-2 border-b">3</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50">
+                                <td class="p-2 border-b border-r font-bold text-left pl-3 bg-slate-50">2022</td>
+                                <td class="p-2 border-b text-slate-400">2</td><td class="p-2 border-b">3</td><td class="p-2 border-b">3</td>
+                                <td class="p-2 border-b text-slate-400">1</td><td class="p-2 border-b text-slate-400">1</td><td class="p-2 border-b text-slate-400">2</td>
+                                <td class="p-2 border-b text-slate-400">2</td><td class="p-2 border-b text-slate-400">2</td><td class="p-2 border-b text-slate-400">2</td>
+                                <td class="p-2 border-b text-slate-400">2</td><td class="p-2 border-b text-slate-400">1</td><td class="p-2 border-b text-slate-400">2</td>
+                            </tr>
+                            <tr class="bg-slate-50/50 text-slate-400">
+                                <td class="p-2 border-r font-bold text-left pl-3 bg-slate-50">2021</td>
+                                <td class="p-2">-</td><td class="p-2">-</td><td class="p-2">-</td>
+                                <td class="p-2">-</td><td class="p-2">-</td><td class="p-2">-</td>
+                                <td class="p-2">-</td><td class="p-2">-</td><td class="p-2">5</td>
+                                <td class="p-2">3</td><td class="p-2">5</td><td class="p-2">4</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                <p class="text-[10px] text-slate-400 mt-2">
-                    ※サロン主催者のBTC決済ログ（損切り含む）を集計。<br>
-                    ※Q1(1-3月) Q2(4-6月) ... の平均値
+                <p class="text-[10px] text-slate-400 mt-3 leading-relaxed">
+                    ※ サロン主催者のBTC決済ログ（利確・損切り含む）を集計。<br>
+                    ※ 2021年はサロン開始の9月からのデータを掲載。<br>
+                    ※ 背景色は決済回数の多さ（市場の活発さ）を表しています。
                 </p>
             </div>
         </div>
         
-        <div class="p-3 bg-slate-50 border-t border-slate-100 text-right">
-            <button onclick="toggleModal()" class="w-full md:w-auto bg-slate-800 text-white px-6 py-2.5 rounded-lg hover:bg-slate-700 transition font-bold text-sm shadow-md">閉じる</button>
+        <div class="p-4 bg-slate-50 border-t border-slate-200 text-right shrink-0">
+            <button onclick="toggleModal()" class="w-full md:w-auto bg-slate-800 text-white px-6 py-3 rounded-lg hover:bg-slate-700 transition font-bold text-sm shadow-md">閉じる</button>
         </div>
     </div>
 </div>
@@ -226,29 +276,25 @@
     // タケさん式ピラミッティング配分
     const allocations = [2, 3, 5, 7, 8, 10, 12, 15, 18, 20];
     
-    // プリセット定義 (各ボタンごとの色設定を変更: 赤・橙・緑)
+    // プリセット定義
     const presets = {
         bull: { 
             data: [3, 2, 1, 0, 0, 0, 0, 0, 0, 0], 
             btnId: 'btn-bull', 
-            // 攻め：赤 (Rose)
             activeClass: 'bg-rose-100 border-rose-500 text-rose-800 ring-1 ring-rose-500 shadow-md transform scale-[1.02]'
         },
         avg:  { 
             data: [2, 1, 1, 0, 0, 0, 0, 0, 0, 0], 
             btnId: 'btn-avg',  
-            // 平均：オレンジ (Orange)
             activeClass: 'bg-orange-100 border-orange-500 text-orange-800 ring-1 ring-orange-500 shadow-md transform scale-[1.02]'
         },
         bear: { 
             data: [1, 1, 0, 0, 0, 0, 0, 0, 0, 0], 
             btnId: 'btn-bear', 
-            // 冬：緑 (Emerald)
             activeClass: 'bg-emerald-100 border-emerald-500 text-emerald-800 ring-1 ring-emerald-500 shadow-md transform scale-[1.02]'
         }
     };
 
-    // 非選択時のボタン共通スタイル
     const inactiveBtnClass = "bg-white border-slate-200 text-slate-500 hover:bg-slate-50";
 
     let currentPresetType = 'avg';
@@ -256,8 +302,6 @@
     function init() {
         renderTable();
         document.getElementById('total-allocation').textContent = allocations.reduce((a, b) => a + b, 0);
-        
-        // 初期プリセット適用
         applyPreset('avg', false); 
     }
 
@@ -266,12 +310,9 @@
         let html = '';
         
         allocations.forEach((rate, index) => {
-            // 浅い玉(1-3)の強調
             const rowClass = index < 3 ? 'bg-yellow-50/50' : '';
             const badge = index < 3 ? '<span class="ml-1 text-[10px] text-yellow-600 font-normal">★</span>' : '';
             const fontStyle = index < 3 ? 'font-bold text-slate-700' : 'text-slate-400';
-            
-            // NO.表記の変更 (#削除)
             const numDisplay = index + 1;
 
             html += `
@@ -295,24 +336,18 @@
         const preset = presets[type];
         if (!preset) return;
 
-        // 1. 全ボタンをリセットして、対象ボタンのみアクティブ色にする
         Object.keys(presets).forEach(key => {
             const p = presets[key];
             const btn = document.getElementById(p.btnId);
-            
-            // 基本クラス（共通部分）
             const baseClasses = "preset-btn p-2 md:p-3 rounded-xl border text-center transition-all duration-200 active:scale-95 group flex-1";
             
             if (key === type) {
-                // 選択中
                 btn.className = `${baseClasses} ${p.activeClass}`;
             } else {
-                // 非選択
                 btn.className = `${baseClasses} ${inactiveBtnClass}`;
             }
         });
 
-        // 2. インプット値を更新
         preset.data.forEach((val, idx) => {
             const input = document.getElementById(`win-input-${idx}`);
             if (input) {
@@ -321,7 +356,6 @@
             }
         });
 
-        // 残りのinputを0に
         for (let i = preset.data.length; i < allocations.length; i++) {
              const input = document.getElementById(`win-input-${i}`);
              if (input) {
@@ -336,7 +370,7 @@
 
     function flashInput(element) {
         element.classList.remove('flash-anim');
-        void element.offsetWidth; // リフロー強制
+        void element.offsetWidth; 
         element.classList.add('flash-anim');
     }
 
@@ -401,14 +435,12 @@
         }
     }
 
-    // モーダル制御
     function toggleModal() {
         const body = document.querySelector('body');
         const modal = document.querySelector('.modal');
         const container = document.querySelector('.modal-container');
         
         if (modal.classList.contains('opacity-0')) {
-            // Open
             modal.classList.remove('opacity-0', 'pointer-events-none');
             body.classList.add('modal-active');
             setTimeout(() => {
@@ -416,7 +448,6 @@
                 container.classList.add('scale-100');
             }, 10);
         } else {
-            // Close
             container.classList.remove('scale-100');
             container.classList.add('scale-95');
             setTimeout(() => {
