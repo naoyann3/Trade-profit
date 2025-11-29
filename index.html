@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KTC 短期トレード 現実シミュレーター</title>
+    <meta name="description" content="トレードの期待値と時給を計算するツール">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap');
+        body { font-family: 'Noto Sans JP', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 p-4 min-h-screen flex items-center justify-center">
+
+    <div class="max-w-xl w-full bg-white shadow-2xl rounded-2xl overflow-hidden border border-slate-200">
+        <!-- ヘッダー -->
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white text-center">
+            <h1 class="text-2xl font-bold mb-1">📉 KTC 現実シミュレーター</h1>
+            <p class="text-blue-100 text-sm opacity-90">そのトレード、本当に儲かってますか？</p>
+        </div>
+
+        <div class="p-6 space-y-6">
+            <!-- 入力エリア -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">投資元本 (円)</label>
+                    <input type="number" id="capital" value="500000" step="10000" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none transition font-mono text-lg text-right">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">月利目標 (%)</label>
+                    <input type="number" id="roi" value="3.0" step="0.1" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none transition font-mono text-lg text-right">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">月額会費 (円)</label>
+                    <input type="number" id="fee" value="20000" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none transition font-mono text-lg text-right">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">労働時間 (月/h)</label>
+                    <input type="number" id="hours" value="75" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none transition font-mono text-lg text-right">
+                </div>
+            </div>
+
+            <!-- 計算結果 -->
+            <div class="bg-slate-50 rounded-xl p-5 border border-slate-200 space-y-3">
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-500">月間粗利益</span>
+                    <span class="font-mono font-bold text-blue-600" id="gross-profit">0</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-500">会費コスト</span>
+                    <span class="font-mono font-bold text-red-500" id="fee-display">0</span>
+                </div>
+                <hr class="border-slate-200">
+                <div class="flex justify-between items-end">
+                    <span class="font-bold text-slate-700">最終手取り</span>
+                    <span class="font-mono text-3xl font-bold text-slate-800" id="net-profit">0</span>
+                </div>
+                <div class="flex justify-between items-center bg-white p-2 rounded border border-slate-100">
+                    <span class="text-xs font-bold text-slate-400 uppercase">実質時給</span>
+                    <span class="font-mono font-bold text-slate-600" id="hourly-wage">0 円/h</span>
+                </div>
+            </div>
+
+            <!-- 判定メッセージエリア -->
+            <div id="result-box" class="hidden rounded-lg p-4 border-l-4">
+                <h3 class="font-bold text-lg flex items-center gap-2" id="result-title"></h3>
+                <p class="text-sm mt-1 opacity-90" id="result-desc"></p>
+                <p class="text-xs font-mono mt-3 opacity-75 pt-2 border-t border-black/10" id="breakeven-text"></p>
+            </div>
+        </div>
+        
+        <div class="bg-slate-50 p-3 text-center text-xs text-slate-400 border-t border-slate-200">
+            Automated Calculation System
+        </div>
+    </div>
+
+    <script>
+        function update() {
+            // 値の取得
+            const capital = Number(document.getElementById('capital').value);
+            const roi = Number(document.getElementById('roi').value);
+            const fee = Number(document.getElementById('fee').value);
+            const hours = Number(document.getElementById('hours').value) || 1;
+
+            // 計算
+            const gross = capital * (roi / 100);
+            const net = gross - fee;
+            const wage = net / hours;
+            const breakeven = (roi > 0) ? (fee / (roi / 100)) : 0;
+
+            // 表示フォーマット関数
+            const fmt = (n) => n.toLocaleString() + ' 円';
+
+            // DOM更新
+            document.getElementById('gross-profit').textContent = '+' + fmt(Math.floor(gross));
+            document.getElementById('fee-display').textContent = '▲' + fmt(fee);
+            
+            const netEl = document.getElementById('net-profit');
+            netEl.textContent = (net > 0 ? '+' : '') + fmt(Math.floor(net));
+            netEl.className = `font-mono text-3xl font-bold ${net > 0 ? 'text-emerald-600' : 'text-rose-600'}`;
+            
+            document.getElementById('hourly-wage').textContent = fmt(Math.floor(wage)) + ' /h';
+
+            // 判定ロジック
+            const box = document.getElementById('result-box');
+            const title = document.getElementById('result-title');
+            const desc = document.getElementById('result-desc');
+            const beText = document.getElementById('breakeven-text');
+
+            box.classList.remove('hidden', 'bg-emerald-100', 'border-emerald-500', 'text-emerald-800', 'bg-rose-100', 'border-rose-500', 'text-rose-800', 'bg-amber-100', 'border-amber-500', 'text-amber-800');
+
+            if (net > 0) {
+                if (wage < 1050) {
+                    // 黒字だが時給が低い
+                    box.classList.add('bg-amber-100', 'border-amber-500', 'text-amber-800');
+                    title.textContent = "⚠️ コンビニバイト以下";
+                    desc.textContent = `黒字ですが、時給換算で ${Math.floor(wage)}円 です。リスクを負ってチャートを見るより、安全なバイトの方が稼げます。`;
+                    beText.textContent = "";
+                } else {
+                    // 完全勝利
+                    box.classList.add('bg-emerald-100', 'border-emerald-500', 'text-emerald-800');
+                    title.textContent = "🚀 労働の対価あり";
+                    desc.textContent = "おめでとうございます。立派なトレーダー（または富豪）です。";
+                    beText.textContent = "";
+                }
+            } else {
+                // 赤字（養分）
+                box.classList.add('bg-rose-100', 'border-rose-500', 'text-rose-800');
+                title.textContent = "💀 あなたは「養分」です";
+                desc.textContent = "会費負けしています。運営に寄付をしている状態です。";
+                beText.textContent = `損益分岐点（最低必要元本）: ${fmt(Math.floor(breakeven))}`;
+            }
+        }
+
+        // イベントリスナー
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', update);
+        });
+
+        // 初回実行
+        update();
+    </script>
+</body>
+</html>
