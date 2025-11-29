@@ -46,7 +46,6 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
             <div>
                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1">運用資金 (円)</label>
-                <!-- type="tel"でスマホのテンキーを呼び出す -->
                 <input type="tel" id="capital" value="1,000,000" class="mono w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none text-right font-bold text-lg bg-slate-50 focus:bg-white transition">
             </div>
             <div>
@@ -65,7 +64,6 @@
                     <span class="text-[10px] font-normal bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full">自動入力</span>
                 </h3>
                 
-                <!-- 根拠データボタン -->
                 <button onclick="toggleModal()" class="w-full md:w-auto text-xs font-bold bg-indigo-600 text-white px-5 py-2.5 rounded-full hover:bg-indigo-700 transition shadow-md flex items-center justify-center gap-2 transform active:scale-95 ring-2 ring-indigo-100">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-indigo-200">
                         <path d="M15.5 2A1.5 1.5 0 0 0 14 3.5v8a1.5 1.5 0 0 0 1.5 1.5h3.5a1.5 1.5 0 0 0 1.5-1.5v-8A1.5 1.5 0 0 0 19 2h-3.5ZM13 4.5V14a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2ZM10 9v3.5a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 12.5v-3.5A1.5 1.5 0 0 1 5 7.5h3.5A1.5 1.5 0 0 1 10 9Z" />
@@ -76,17 +74,14 @@
 
             <!-- ボタン群 -->
             <div class="grid grid-cols-3 gap-3">
-                <!-- 攻め（赤系） -->
                 <button id="btn-bull" onclick="applyPreset('bull')" class="preset-btn p-3 rounded-xl border text-center transition duration-200 active:scale-95 group hover:bg-rose-50 hover:border-rose-200 hover:text-rose-700">
                     <div class="text-sm font-bold mb-1 group-hover:scale-105 transition-transform">🚀 攻め</div>
                     <div class="text-[10px] opacity-80">月5.5回</div>
                 </button>
-                <!-- 平均（オレンジ系） -->
                 <button id="btn-avg" onclick="applyPreset('avg')" class="preset-btn p-3 rounded-xl border text-center transition duration-200 active:scale-95 group hover:bg-orange-50 hover:border-orange-200 hover:text-orange-700">
                     <div class="text-sm font-bold mb-1 group-hover:scale-105 transition-transform">⚖️ 平均</div>
                     <div class="text-[10px] opacity-80">月3.7回</div>
                 </button>
-                <!-- 冬（緑系） -->
                 <button id="btn-bear" onclick="applyPreset('bear')" class="preset-btn p-3 rounded-xl border text-center transition duration-200 active:scale-95 group hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-600">
                     <div class="text-sm font-bold mb-1 group-hover:scale-105 transition-transform">❄️ 冬</div>
                     <div class="text-[10px] opacity-80">月2.1回</div>
@@ -96,9 +91,18 @@
 
         <!-- ピラミッティング入力エリア -->
         <div>
-            <h3 class="font-bold text-sm text-slate-700 mb-2 flex items-center gap-2">
-                <span>📝 玉ごとの利確回数</span>
-            </h3>
+            <div class="flex flex-col sm:flex-row justify-between sm:items-end mb-2 gap-1">
+                <h3 class="font-bold text-sm text-slate-700 flex items-center gap-2">
+                    <span>📝 玉ごとの利確回数</span>
+                </h3>
+                <p class="text-xs text-slate-400 flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4">
+                        <path d="M13.488 2.513a1.75 1.75 0 0 0-2.475 0L6.75 6.774a2.75 2.75 0 0 0-.596.892l-.848 2.047a.75.75 0 0 0 .98.98l2.047-.848a2.75 2.75 0 0 0 .892-.596l4.261-4.262a1.75 1.75 0 0 0 0-2.474Z" />
+                        <path d="M4.75 3.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h6.5c.69 0 1.25-.56 1.25-1.25V9A.75.75 0 0 1 14 9v2.25A2.75 2.75 0 0 1 11.25 14h-6.5A2.75 2.75 0 0 1 2 11.25v-6.5A2.75 2.75 0 0 1 4.75 2H7a.75.75 0 0 1 0 1.5H4.75Z" />
+                    </svg>
+                    <span>各玉の回数は直接編集できます</span>
+                </p>
+            </div>
             <div class="overflow-x-auto rounded-lg border border-slate-200">
                 <table class="w-full text-sm text-left min-w-custom">
                     <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b">
@@ -273,56 +277,46 @@
         bull: { 
             data: [3, 2, 1, 0, 0, 0, 0, 0, 0, 0], 
             btnId: 'btn-bull', 
-            activeClass: 'bg-rose-100 border-rose-500 text-rose-800 ring-1 ring-rose-500 shadow-md transform scale-[1.02]'
+            activeClass: 'bg-rose-100 border-rose-500 text-rose-800 ring-2 ring-rose-300 shadow-md'
         },
         avg:  { 
             data: [2, 1, 1, 0, 0, 0, 0, 0, 0, 0], 
             btnId: 'btn-avg',  
-            activeClass: 'bg-orange-100 border-orange-500 text-orange-800 ring-1 ring-orange-500 shadow-md transform scale-[1.02]'
+            activeClass: 'bg-orange-100 border-orange-500 text-orange-800 ring-2 ring-orange-300 shadow-md'
         },
         bear: { 
             data: [1, 1, 0, 0, 0, 0, 0, 0, 0, 0], 
             btnId: 'btn-bear', 
-            activeClass: 'bg-emerald-100 border-emerald-500 text-emerald-800 ring-1 ring-emerald-500 shadow-md transform scale-[1.02]'
+            activeClass: 'bg-emerald-100 border-emerald-500 text-emerald-800 ring-2 ring-emerald-300 shadow-md'
         }
     };
 
     const inactiveBtnClass = "bg-white border-slate-200 text-slate-500 hover:bg-slate-50";
 
-    let currentPresetType = 'avg';
-
     function init() {
-        // 通貨入力欄のセットアップ
         setupCurrencyInput('capital');
-        
         renderTable();
         document.getElementById('total-allocation').textContent = allocations.reduce((a, b) => a + b, 0);
-        
-        // 初期プリセット適用
-        applyPreset('avg', true); 
+        applyPreset('avg'); 
     }
     
-    // 通貨入力の挙動制御（Focusで数値のみ、Blurでカンマ付与）
     function setupCurrencyInput(id) {
         const el = document.getElementById(id);
         
         el.addEventListener('focus', function() {
-            // フォーカス時：カンマを除去して数値のみにする
             let val = this.value.replace(/[^0-9]/g, '');
-            if (Number(val) === 0) val = ''; // 0なら空にして打ちやすく
+            if (Number(val) === 0) val = '';
             this.value = val;
-            this.select(); // 全選択
+            this.select();
         });
 
         el.addEventListener('blur', function() {
-            // フォーカスアウト時：カンマ区切りに戻す
             let val = this.value.replace(/[^0-9]/g, '');
             if (val === '') val = '0';
             this.value = Number(val).toLocaleString();
         });
         
         el.addEventListener('input', function() {
-            // 入力中：数字以外を削除
             this.value = this.value.replace(/[^0-9]/g, '');
         });
     }
@@ -382,13 +376,9 @@
              const input = document.getElementById(`win-input-${i}`);
              if (input) {
                  input.value = 0;
-                 if(doFlash && input.value != 0) flashInput(input);
              }
         }
-
-        currentPresetType = type;
         
-        // プリセット変更時は自動計算してあげる（UX向上）
         calculate();
     }
 
@@ -400,15 +390,6 @@
 
     function fmt(num) {
         return num.toLocaleString();
-    }
-
-    // 手動計算時のフォーマット処理（oninput属性用にはもう使わないが、念のため残すなら中身を変える）
-    function formatCurrencyInput(input) {
-        // 今回の改修でEventListener方式に変えたため、HTML側のoninputからは削除してOKですが
-        // 万が一HTMLに残っていた場合のための互換性
-        let val = input.value.replace(/[^0-9]/g, '');
-        if (val === '') val = '0';
-        // input.value = Number(val).toLocaleString(); // リアルタイムフォーマットは廃止
     }
 
     function getNum(id) {
@@ -458,8 +439,7 @@
             }, 200);
         }
     }
-
-    document.getElementById('profitRate').addEventListener('input', calculate);
+    
     window.onload = init;
 </script>
 
